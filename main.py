@@ -247,7 +247,8 @@ def append_to_cands(cands,cleans,row,uid):
     cands.loc[new_row,'英文+省'] = Txt2Clean.get()
     cands.loc[new_row,'机构英文写法'] = Txt2Clean.get().split('_')[0]
     cands.loc[new_row,'省（直译名机构所在省市）'] = Txt2Clean.get().split('_')[-1]
-    cands.loc[new_row,'市'] = np.nan
+    if cands.loc[new_row,'省（直译名机构所在省市）'] != cands.loc[row,'省（直译名机构所在省市）']:
+        cands.loc[new_row,'市'] = np.nan
 
     cands.loc[new_row,'time'] = time.strftime("%Y/%m/%d")
     cands.loc[new_row,'based on'] = row
