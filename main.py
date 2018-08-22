@@ -26,14 +26,6 @@ window.lift()
 #window.geometry('1650x450')
 
 
-#windowWidth = window.winfo_reqwidth()
-#windowHeight = window.winfo_reqheight()
-#print("Width",windowWidth,"Height",windowHeight)
- 
-# Gets both half the screen width/height and window width/height
-#positionRight = int(window.winfo_screenwidth()/2 - windowWidth/2)
-#positionDown = int(window.winfo_screenheight()/2 - windowHeight/2)
-#window.geometry("+{}+{}".format(positionRight, positionDown))
 
 ##--------- New or Continue Project -------------------------------------------
 def ask_new_or_continue():
@@ -127,29 +119,40 @@ help_item.add_command(label='About', command=click_help_about)
 menu.add_cascade(label='Help', menu=help_item)
 window.config(menu=menu)
 
+
+##----------- tab -------------------------------------------------------------
+nb = ttk.Notebook(window)
+tab_multi = ttk.Frame(nb)
+tab_single = ttk.Frame(nb)
+nb.add(tab_multi, text='在线')
+nb.add(tab_single, text='本地')
+nb.grid()
+
+
+############### on tab_multi ###################################################
 ##----------- show compared affiliations --------------------------------------
 
-lbl_curr = Label(window, text="Current item: ")
+lbl_curr = Label(tab_multi, text="Current item: ")
 lbl_curr.grid(column=0, row=0,sticky=tk.E)
-lbl_cand = Label(window, text="Candidate item: ")
+lbl_cand = Label(tab_multi, text="Candidate item: ")
 lbl_cand.grid(column=0, row=1,sticky=tk.E)
 
 
 
 
-txt_curr = Text(window,font="Macro 12", width=120, height=1)
+txt_curr = Text(tab_multi,font="Macro 12", width=120, height=1)
 txt_curr.grid(column=1, row=0,columnspan=8,padx=2, pady=2,stick=tk.E)
-lb_cand = Listbox(window, font="Macro 12", width=120, height=15)
+lb_cand = Listbox(tab_multi, font="Macro 12", width=120, height=15)
 lb_cand.grid(column=1, row=1,columnspan=8,padx=2, pady=2,stick=tk.E)
 
 
 
 
-lbl_sim_threshold = Label(window, text=f'Similarity Threshold:')
+lbl_sim_threshold = Label(tab_multi, text=f'Similarity Threshold:')
 lbl_sim_threshold.grid(column=1,row=2,sticky='e')
 
 SimThreshold = DoubleVar(value=0.5)
-txt_sim_threshold = Entry(window, textvariable=SimThreshold, width=8)
+txt_sim_threshold = Entry(tab_multi, textvariable=SimThreshold, width=8)
 txt_sim_threshold.grid(column=2, row=2,sticky='w')
 
 def reshow(event):
@@ -338,16 +341,16 @@ def click_new():
 
     
     
-btn_previous = Button(window, text="Previous", command=click_previous)
+btn_previous = Button(tab_multi, text="Previous", command=click_previous)
 btn_previous.grid(column=5, row=2,pady=2,padx=6,sticky='we')
 
-btn_next = Button(window, text="Next", command=click_next)
+btn_next = Button(tab_multi, text="Next", command=click_next)
 btn_next.grid(column=6, row=2,pady=2,padx=6,sticky='we')
 
-btn_select = Button(window, text="Select", command=click_select)
+btn_select = Button(tab_multi, text="Select", command=click_select)
 btn_select.grid(column=7, row=2,pady=2,padx=6,sticky='we')
 
-btn_new = Button(window, text="New", command=click_new)
+btn_new = Button(tab_multi, text="New", command=click_new)
 btn_new.grid(column=8, row=2,pady=2,padx=6,sticky='we')
 
 
@@ -355,14 +358,14 @@ btn_new.grid(column=8, row=2,pady=2,padx=6,sticky='we')
 ##------------- progress bar --------------------------------------------------
 
 
-lbl_probar = Label(window, text=f'Completed:')
+lbl_probar = Label(tab_multi, text=f'Completed:')
 lbl_probar.grid(column=1,row=5,sticky='e')
 
 
 style = ttk.Style()
 style.theme_use('clam')
 style.configure("black.Horizontal.TProgressbar", background='black')
-bar = Progressbar(window, maximum=MAX.get(), length=200, style='grey.Horizontal.TProgressbar')
+bar = Progressbar(tab_multi, maximum=MAX.get(), length=200, style='grey.Horizontal.TProgressbar')
 bar['value'] = Clean_idx.get()
 bar.grid(column=2, row=5,columnspan=2,sticky='w')
 
@@ -399,11 +402,43 @@ def click_close():
     else:
         print('nothing')
 
-btn_save = Button(window, text="Save", command=click_save)
+btn_save = Button(tab_multi, text="Save", command=click_save)
 btn_save.grid(column=3, row=6,padx=6,sticky='we')
 
-btn_close = Button(window, text="Close", command=click_close)
+btn_close = Button(tab_multi, text="Close", command=click_close)
 btn_close.grid(column=4, row=6,padx=6,sticky='we')
+
+############### on tab_single ###################################################
+single_curr = Label(tab_single, text="Current item: ")
+single_curr.grid(column=0, row=0,sticky=tk.E)
+single_ety = Entry(tab_single, width=90)
+single_ety.grid(column=1, row=0, columnspan=7,sticky='we')
+
+txt_single = Text(tab_single,font="Macro 12", width=90, height=20)
+txt_single.grid(column=1, row=1, columnspan=7,pady=2,padx=6,sticky='wes')
+
+
+def click_identify():
+    text = single_ety.get()
+    cands = []
+    for i in range(df_cand.shape[0]):
+        aff_cand = df_cand.iloc[i]['英文+省']
+        seqm = difflib.SequenceMatcher(None, text.lower(), aff_cand.lower())
+        sim = seqm.ratio()
+        cands.append((sim,aff_cand,i))
+    cands = sorted(cands,key=lambda e:-e[0])
+    sim,aff_cand,od = cands[0]
+    
+    for col in df_cand.columns:
+        txt_single.insert(END,col)
+        row += 1
+        
+
+    return
+
+btn_trans = Button(tab_single, text="识别", command=click_identify)
+btn_trans.grid(column=8, row=0,pady=2,padx=6,sticky='we')
+
 
 
 
