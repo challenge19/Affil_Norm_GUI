@@ -411,15 +411,16 @@ btn_close.grid(column=4, row=6,padx=6,sticky='we')
 ############### on tab_single ###################################################
 single_curr = Label(tab_single, text="Current item: ")
 single_curr.grid(column=0, row=0,sticky=tk.E)
-single_ety = Entry(tab_single, width=90)
-single_ety.grid(column=1, row=0, columnspan=7,sticky='we')
+single_ety = Entry(tab_single, width=110)
+single_ety.grid(column=1, row=0, columnspan=7,padx=6,sticky='we')
 
-txt_single = Text(tab_single,font="Macro 12", width=90, height=20)
+txt_single = Text(tab_single,font="Macro 12", width=110, height=20)
 txt_single.grid(column=1, row=1, columnspan=7,pady=2,padx=6,sticky='wes')
 
 
 def click_identify():
     text = single_ety.get()
+    txt_single.delete(1.0,END)
     cands = []
     for i in range(df_cand.shape[0]):
         aff_cand = df_cand.iloc[i]['英文+省']
@@ -429,10 +430,9 @@ def click_identify():
     cands = sorted(cands,key=lambda e:-e[0])
     sim,aff_cand,od = cands[0]
     
+    Length = max([len(col.encode('gbk')) for col in df_cand.columns])
     for col in df_cand.columns:
-        txt_single.insert(END,col)
-        row += 1
-        
+        txt_single.insert(END, ' '*(Length-len(col.encode('gbk'))) +col +':'+str(df_cand.loc[od,col])+'\n')        
 
     return
 
